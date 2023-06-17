@@ -22,7 +22,7 @@ function mouseOn(item) {
   }
   
 function mouseOut(item) {
-item.style.backgroundColor = "#f8cac0"
+    item.style.backgroundColor = "#f8cac0"
 }
   
 
@@ -38,7 +38,7 @@ function Uploader() {
     }
 
     const wifibuttonStyle = {
-        width: 300, height: 66,
+        width: 300, height: 88,
         backgroundColor: "#f8cac0",
         justifyContent: "center", // 行居中
         alignItems: "center", // 列居中
@@ -47,11 +47,11 @@ function Uploader() {
         display: "flex",
         position: "absolute",
         top: 266,
-        left: 466
+        left: 66
     }
 
     const requestStyle = {
-        width: 300, height: 66,
+        width: 300, height: 88,
         backgroundColor: "#f8cac0",
         justifyContent: "center", // 行居中
         alignItems: "center", // 列居中
@@ -59,7 +59,7 @@ function Uploader() {
         fontSize: 30,
         display: "flex",
         position: "absolute",
-        top: 366,
+        top: 266,
         left: 466
     }
 
@@ -72,18 +72,9 @@ function Uploader() {
         fontSize: 30,
         display: "flex",
         position: "absolute",
-        top: 466,
-        left: 466
+        top: 266,
+        left: 866
     }
-
-    // const buttonStyle = {
-    //     width: 256, height: 66,
-    //     display: "flex",
-    //     justifyContent: "center", // 行居中
-    //     alignItems: "center", // 列居中
-    //     color:"#534d4c",
-    //     fontSize: 30
-    // }
 
     const downloaderButtonStyle = {
         width: 180, height: 66,
@@ -96,6 +87,11 @@ function Uploader() {
         position: "absolute",
         top: 160,
         left: 1050
+    }
+
+    const feedbackZone = {
+        position: "absolute", top: 500,
+        width: 1200, height: 80,
     }
 
     const { isWeb3Enabled, chainId } = useMoralis();
@@ -162,6 +158,9 @@ function Uploader() {
         // 从数组中移除目标对象
         setNestedJsonObjects(prevState => prevState.filter((_, idx) => idx !== index));
     };
+
+    const feedbackStyle = {color:"#534d4c", fontFamily:"cursive", margin:7};
+
     function encryptData(plaintext, keyString) {
         const key = CryptoJS.enc.Utf8.parse(keyString);
 
@@ -172,11 +171,55 @@ function Uploader() {
 
         return encrypted.toString();
     }
+
+    var getMyWifi_Num = 0;
+
+    function uploadWifiButtonEvent(index) {
+        var button = document.getElementsByClassName("up load my wifi")[index];
+        
+        button.style.backgroundColor = "#DAD0B1";
+        button.onmouseout = function() {
+            this.style.backgroundColor = "#FAF2D6";
+        }
+    }
+
+    function quitWifiButtonEvent(index) {
+        var button = document.getElementsByClassName("quit uploade wifi")[index];
+        
+        button.style.backgroundColor = "#C1BFB8";
+        button.onmouseout = function() {
+            this.style.backgroundColor = "#EBEAE8";
+        }
+    }
+
+    function admitRequestButtonEvent(index) {
+        var button = document.getElementsByClassName("admit request button" )[index];
+        
+        button.style.backgroundColor = "#DAD0B1";
+        button.onmouseout = function() {
+            this.style.backgroundColor = "#FAF2D6";
+        }
+    }
+
+    function refuseRequestButtonEvent(index) {
+        var button = document.getElementsByClassName("refuse request button")[index];
+        
+        button.style.backgroundColor = "#C1BFB8";
+        button.onmouseout = function() {
+            this.style.backgroundColor = "#EBEAE8";
+        }
+    }
+
     return (
         <div className={styles.container}>
             {isWeb3Enabled ? (
                 <div >
                 <Header />
+                
+                {/* 返回信息区域 */}
+                <div id="feedback zone" style={{position:"absolute", top: 400, height: 60, width: 1200, left: 44}}>
+                    <img src="feedback.jpg"></img>
+                </div>
 
                 <div id="downloader page button" style={downloaderButtonStyle} onMouseOver={async() =>{
                     var button = document.getElementById("downloader page button");
@@ -187,6 +230,9 @@ function Uploader() {
                     }}}>
                     <Link href={"/downloader"}>downloader</Link>
                 </div>
+
+
+              
                     {/* <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
                         onClick={() => {
                             // const key = CryptoJS.enc.Utf8.parse("0123456789abcdef");
@@ -259,12 +305,15 @@ function Uploader() {
 
 
                         }} disabled={isLoading}>生成密钥</button> */}
-
+                    
                         
                     <div style={backgroundStyle}>
                         {/* get my wifi button */}
                         <button
                             onClick={async () => {
+                                // 点击 get my wifi 按钮的时候就清空其它两个按钮产生的返回信息
+
+
                                 try {
                                     console.log("WebSocket connection opened");
 
@@ -309,6 +358,7 @@ function Uploader() {
 
                                                     // 将每个 nestedJsonObject 添加到数组中
                                                     setNestedJsonObjects((prevState) => [...prevState, nestedJsonObject]);
+
                                                 }
                                                 socket.close()
                                             };
@@ -329,84 +379,173 @@ function Uploader() {
                                     mouseOut(button);
                                     }
                                 }}>get my wifi</div>
-                            </button>
+                        </button>
+                        
+                        {/* 查看申请 button */}
+                        <button
+                            onClick={async () => {
+                                setisLoading_getuploaderMail(true);
+                                const provider = new ethers.providers.Web3Provider(window.ethereum)
+                                const signer = provider.getSigner()
+                                const contract = new ethers.Contract(contractAddress_mumbai, abi, signer)
+                                try {
+                                    let signer_address = await signer.getAddress();
+                                    const val = await contract.uploader_confirm(signer_address);
+                                    for (let i = 0; i < val.length; i++) {
 
-                        <div>
-                            {nestedJsonObjects.map((nestedJsonObject, index) => (
-                                <div key={index}>
-                                    <h3><strong>Wifi:</strong> {index + 1}</h3>
-                                    <li><strong>Price:</strong> {nestedJsonObject["price"]}</li>
-                                    <li> <strong>Timestamp:</strong>{nestedJsonObject["timestamp"]}</li>
-                                    <li><strong>Shop location information:</strong> {nestedJsonObject["shop location information"]}</li>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                                        onClick={() => handleUpload(nestedJsonObject)}
-                                        disabled={isLoading}>{isLoading ? (
-                                            <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-                                        ) : (
-                                            "上传"
-                                        )}</button>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
-                                        onClick={() => handleCancel(index)} disabled={isLoading}>取消</button>
-                                    <hr></hr>
-                                </div>
-                            ))}
-                        </div>
+                                        let wifiid = val[i].wifiid
+                                        let requestId = val[i].requestId
+                                        let downloader_information = val[i].downloader_information
+                                        let downloader_pubilickey = val[i].downloader_pubilickey
+                                        let time = val[i].time
+                                        const newEvent = { wifiid, requestId, downloader_information, downloader_pubilickey, time };
+                                        setEvent_requestId_Data((prevData) => [...prevData, newEvent])
+                                    }
 
-                        <div>
-                            <button
-                                onClick={async () => {
-                                    setisLoading_getuploaderMail(true);
-                                    const provider = new ethers.providers.Web3Provider(window.ethereum)
-                                    const signer = provider.getSigner()
-                                    const contract = new ethers.Contract(contractAddress_mumbai, abi, signer)
-                                    try {
-                                        let signer_address = await signer.getAddress();
-                                        const val = await contract.uploader_confirm(signer_address);
-                                        for (let i = 0; i < val.length; i++) {
-
-                                            let wifiid = val[i].wifiid
-                                            let requestId = val[i].requestId
-                                            let downloader_information = val[i].downloader_information
-                                            let downloader_pubilickey = val[i].downloader_pubilickey
-                                            let time = val[i].time
-                                            const newEvent = { wifiid, requestId, downloader_information, downloader_pubilickey, time };
-                                            setEvent_requestId_Data((prevData) => [...prevData, newEvent])
-                                        }
-
-                                        handleNewNotification()
-                                        setisLoading_getuploaderMail(false);
-                                    } catch (err) {
-                                        console.log(err);
-                                        setisLoading_getuploaderMail(false);
+                                    handleNewNotification()
+                                    setisLoading_getuploaderMail(false);
+                                } catch (err) {
+                                    console.log(err);
+                                    setisLoading_getuploaderMail(false);
+                                }finally {
+                                    // 点击 查看 按钮的时候就清空其它两个按钮产生的返回信息
+                                    
+                                }
+                            }}
+                            disabled={isLoading_getuploaderMail}>{isLoading_getuploaderMail ? (
+                                <div ></div>
+                            ) : (
+                                <div id="seek" style={requestStyle} onMouseOver={
+                                    async() =>{
+                                    var button = document.getElementById("seek");
+                                    mouseOn(button);
+                    
+                                    button.onmouseout = function() {
+                                    mouseOut(button);
                                     }
                                 }}
-                                disabled={isLoading_getuploaderMail}>{isLoading_getuploaderMail ? (
-                                    <div ></div>
-                                ) : (
-                                    <div id="seek" style={requestStyle} onMouseOver={
-                                        async() =>{
-                                        var button = document.getElementById("seek");
-                                        mouseOn(button);
-                        
-                                        button.onmouseout = function() {
-                                        mouseOut(button);
-                                        }
-                                    }}
-                                    >"查看申请"</div>
-                                )}</button>
+                                >"查看申请"</div>
+                        )}</button>
 
-                            <div>
+                        {/* show wifi by uploaderAddress button */}
+                        <button style={showStyle}
+                            onClick={async () => {
+                                setisLoading_showup(true);
+                                const provider2 = new ethers.providers.Web3Provider(window.ethereum)
+                                const signer2 = provider2.getSigner()
+                                const contract2 = new ethers.Contract(contractAddress_mumbai, abi, signer2)
+                                try {
+                                    let address_up = signer2.getAddress()
+
+                                    const val = await contract2.fetch_wifi_byUploaderAddr(address_up)
+                                    // console.log(val)
+                                    for (let i = 0; i < val.length; i++) {
+                                        let id = val[i].id
+                                        let Price = val[i].Price
+                                        let WifiPrint = val[i].WifiPrint
+                                        let location = val[i].location
+                                        let Shop = val[i].Shop
+                                        let uploader = val[i].uploader
+                                        let timestamp = val[i].timestamp
+                                        let shop_information = val[i].shop_information
+                                        const newEvent = { id, Price, WifiPrint, location, Shop, uploader, timestamp, shop_information };
+                                        setEvent_uploadAddr_Data((prevData) => [...prevData, newEvent])
+                                    }
+
+                                    handleNewNotification()
+                                    setisLoading_showup(false);
+                                } catch (err) {
+                                    console.log(err)
+                                    setisLoading_showup(false);
+                                } 
+
+                            }} disabled={isLoading_showup}
+                        >
+                            {isLoading_showup ? (
+                                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                            ) : (
+                                " "
+
+                            )}
+                            <p id="show" onMouseOver={
+                                async() =>{
+                                var button = document.getElementById("show");
+                                mouseOn(button);
+                
+                                button.onmouseout = function() {
+                                mouseOut(button);
+                                }
+                            }}>show wifi by uploaderAddress</p>
+                        </button>
+                        
+                        <body id="feedback info" style={feedbackZone}>
+                            {/* get my wifi feedback information */}
+                            <div id="get my wifi button return info"  >
+                                {nestedJsonObjects.map((nestedJsonObject, index) => (
+                                    <div className="get my wifi button feedback" key={index} style={{backgroundColor:"#ebf6f4"}} onChange={async() => {
+                                        var place = document.getElementById("feedback info");
+                                        var insertNode = document.getElementsByClassName("get my wifi button feedback")[index];
+                                        place.prepend(insertNode)
+                                    }}>
+                                        <h3 style={feedbackStyle}><strong>Wifi:</strong> {index + 1}</h3>
+                                        <div style={{height:"20", backgroundColor:"#ebf6f4"}}></div> {/* 小的间隙 */}
+                                        <li style={feedbackStyle}><strong>Price:</strong> {nestedJsonObject["price"]}</li>
+                                        <div style={{height:"20", backgroundColor:"#ebf6f4"}}></div>{/* 小的间隙 */}
+                                        <li style={feedbackStyle}> <strong>Timestamp:</strong>{nestedJsonObject["timestamp"]}</li>
+                                        <div style={{height:"20", backgroundColor:"#ebf6f4"}}></div>{/* 小的间隙 */}
+                                        <li style={feedbackStyle}><strong>Shop location information:</strong> {nestedJsonObject["shop location information"]}</li>
+                                        
+                                        {/* 上传 button */}
+                                        <button className="up load my wifi" style={{backgroundColor:"#FAF2D6", height:50, width: 100, margin: 10}}
+                                            onMouseOver={()=>uploadWifiButtonEvent(index)}
+                                            onClick={() => handleUpload(nestedJsonObject)}
+                                            disabled={isLoading}>{isLoading ? (
+                                                <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
+                                            ) : (
+                                                "上传"
+                                            )
+
+                                        }</button>
+                                        
+                                        {/* 取消 button */}
+                                        <button className="quit uploade wifi" style={{backgroundColor:"#EBEAE8", height:50, width: 100, margin: 10}}
+                                            onMouseOver={()=>quitWifiButtonEvent(index)}
+                                            onClick={() => handleCancel(index)} disabled={isLoading}>取消显示
+                                        </button>
+                                        
+                                        <p style={{height:"20", backgroundColor:"#ebf6f4"}}></p>{/* 小的间隙 */}
+                                    </div>
+
+                                ))}
+                            </div>
+                            {/* style={getMyWifi_Returninfo} */}
+
+                            {/* 查看申请 feedback information */}
+                            <div id="inquire request button return">
                                 {event_requestId_Data.map((event, index) => (
-                                    <div key={index}>
+                                    <div className="inquire request button feedback" key={index} onChange={async() => {
+                                        var place = document.getElementById("feedback info");
+                                        var insertNode = document.getElementsByClassName("inquire request button feedback")[index];
+                                        place.prepend(insertNode);
+                                    }}>  
+
+                                    <div style={{backgroundColor:"#ebf6f4"}}>
+
                                         <ul className="event-list">
-                                            <li><strong>WiFi ID:</strong> {event.wifiid.toString()}</li>
-                                            <li><strong>Request ID:</strong> {event.requestId.toString()}</li>
-                                            <li><strong>Downloader Public Key:</strong> {event.downloader_information.toString()}</li>
-                                            <li><strong>Downloader Information:</strong> {event.downloader_pubilickey.toString()}</li>
-                                            <li><strong>Time:</strong> {event.time.toString()}</li>
+                                            <li style={{color:"#534d4c", fontFamily:"cursive", margin:7}}><strong>WiFi ID:</strong> {event.wifiid.toString()}</li>
+                                            <li style={{color:"#534d4c", fontFamily:"cursive", margin:7}}><strong>Request ID:</strong> {event.requestId.toString()}</li>
+                                            <li style={{color:"#534d4c", fontFamily:"cursive", margin:7}}><strong>Downloader Public Key:</strong></li>
+                                            <div style={{color:"#534d4c", fontFamily:"cursive", margin:7, fontSize: 14}}> {event.downloader_information.toString()}</div>
+                                            <li style={{color:"#534d4c", fontFamily:"cursive", margin:7}}><strong>Downloader Information:</strong> {event.downloader_pubilickey.toString()}</li>
+                                            <li style={{color:"#534d4c", fontFamily:"cursive", margin:7}}><strong>Time:</strong> {event.time.toString()}</li>
                                         </ul>
-                                        <input type="text" value={private_key} onChange={handleprivate_key} placeholder="Input your private key" />
-                                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                                        <input type="text" style={{margin:10}} value={private_key} onChange={handleprivate_key} placeholder="Input your private key" />
+                                        
+                                        <br></br>
+
+                                        <button className="admit request button" 
+                                            style={{color: "#534d4c", margin: 10, backgroundColor: "#FFEEDB", height: 60, width: 180}} 
+                                            onMouseOver={()=>admitRequestButtonEvent(index)}
                                             onClick={async () => {
                                                 if (private_key != "") {
                                                     let istrueUploader = false;
@@ -494,15 +633,6 @@ function Uploader() {
 
                                                     }
 
-
-
-
-
-
-
-
-
-
                                                 }
                                                 else {
                                                     setisLoading_shenqing(false);
@@ -517,8 +647,14 @@ function Uploader() {
                                                 <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
                                             ) : (
                                                 " "
-                                            )}同意申请</button>
-                                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                                            )}同意申请
+                                            <div >
+                                                
+                                            </div>
+                                        </button>
+                                        
+                                        <button className="refuse request button" style={{color: "#534d4c", margin: 10, backgroundColor: "#EBEAE8", height: 60, width: 180}}
+                                            onMouseOver={()=>refuseRequestButtonEvent(index)}
                                             onClick={async () => {
                                                 const provider2 = new ethers.providers.Web3Provider(window.ethereum)
                                                 const signer2 = provider2.getSigner()
@@ -534,91 +670,56 @@ function Uploader() {
                                                 // 从事件数组中删除当前事件
                                                 const updatedEvents = event_requestId_Data.filter((_, i) => i !== index);
                                                 setEvent_requestId_Data(updatedEvents);
-                                            }} disabled={isLoading_shenqing}>拒绝申请</button>
+                                            }} disabled={isLoading_shenqing}>拒绝申请
+                                        </button>
+                                        
+    
+                                    </div>
                                     </div>
                                 ))
 
                                 }
                             </div>
-                            <button style={showStyle}
-                                onClick={async () => {
-                                    setisLoading_showup(true);
-                                    const provider2 = new ethers.providers.Web3Provider(window.ethereum)
-                                    const signer2 = provider2.getSigner()
-                                    const contract2 = new ethers.Contract(contractAddress_mumbai, abi, signer2)
-                                    try {
-                                        let address_up = signer2.getAddress()
-
-                                        const val = await contract2.fetch_wifi_byUploaderAddr(address_up)
-                                        // console.log(val)
-                                        for (let i = 0; i < val.length; i++) {
-                                            let id = val[i].id
-                                            let Price = val[i].Price
-                                            let WifiPrint = val[i].WifiPrint
-                                            let location = val[i].location
-                                            let Shop = val[i].Shop
-                                            let uploader = val[i].uploader
-                                            let timestamp = val[i].timestamp
-                                            let shop_information = val[i].shop_information
-                                            const newEvent = { id, Price, WifiPrint, location, Shop, uploader, timestamp, shop_information };
-                                            setEvent_uploadAddr_Data((prevData) => [...prevData, newEvent])
-                                        }
-
-                                        handleNewNotification()
-                                        setisLoading_showup(false);
-                                    } catch (err) {
-                                        console.log(err)
-                                        setisLoading_showup(false);
-                                    }
-
-
-                                }} disabled={isLoading_showup}
-                            >
-                                {isLoading_showup ? (
-                                    <div className="animate-spin spinner-border h-8 w-8 border-b-2 rounded-full"></div>
-                                ) : (
-                                    " "
-
-                                )}
-                                <p id="show" onMouseOver={
-                                    async() =>{
-                                    var button = document.getElementById("show");
-                                    mouseOn(button);
-                    
-                                    button.onmouseout = function() {
-                                    mouseOut(button);
-                                    }
-                                }}>show wifi by uploaderAddress</p>
-                            </button>
-                            <div>
+                            
+                            {/* show wifi by uploaderAddress feedback information */}
+                            <div id="show wifi button return">
                                 {event_uploadAddr_Data.map((event, index) => (
-                                    <div key={index}>
-                                        <p>Wifi_id: {event.id.toString()}</p>
-                                        <p>wifi_Price: {event.Price.toString()}</p>
-                                        <p>WifiPrint: {event.WifiPrint.toString()}</p>
-                                        <p>location: {event.location.toString()}</p>
-                                        <p>ShopAddress: {event.Shop.toString()}</p>
-                                        <p>uploaderAddress: {event.uploader.toString()}</p>
-                                        <p>timestamp: {event.timestamp.toString()}</p>
-                                        <p>shop_information: {event.shop_information.toString()}</p>
+                                    <div className="show wifi button feedback" key={index} style={{backgroundColor:"#ebf6f4"}}>
+                                        <p style={{color:"#F08A70", fontFamily:"cursive", margin:7}}><strong>Wifi_id:</strong> {event.id.toString()}</p>
+                                        <p style={feedbackStyle}><strong>wifi_Price:</strong> {event.Price.toString()}</p>
+                                        <p style={feedbackStyle}><strong>WifiPrint:</strong> </p>
+                                        <div style={{fontSize: 14, margin: 10, height:50,width:1190, position:"relative", top: 0, overflowX: "scroll", whiteSpace: "nowrap"}}>
+                                            {event.WifiPrint.toString()}
+                                        </div>
+                                        <p style={feedbackStyle}><strong>location:</strong> {event.location.toString()}</p>
+                                        <p style={feedbackStyle}><strong>ShopAddress:</strong> {event.Shop.toString()}</p>
+                                        <p style={feedbackStyle}><strong>uploaderAddress:</strong> {event.uploader.toString()}</p>
+                                        <p style={feedbackStyle}><strong>timestamp: </strong>{event.timestamp.toString()}</p>
+                                        <p style={feedbackStyle}><strong>shop_information:</strong> {event.shop_information.toString()}</p>
                                     </div>
                                 ))
 
                                 }
                                 {event_uploadAddr_Data.length > 0 && (
                                     <button
-                                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-auto"
+                                        id="clear all" style={{backgroundColor:"#EBEAE8", height:50, width: 100, margin: 10}}
                                         onClick={() => setEvent_uploadAddr_Data([])}
+                                        onMouseOver={async()=>{
+                                            var button = document.getElementById("clear all");
+                                            button.style.backgroundColor = "#C1BFB8";
+                                            button.onmouseout = function() {
+                                                this.style.backgroundColor = "#EBEAE8";
+                                            }
+                                        }}
                                     >
                                         清空
                                     </button>
                                 )}
                             </div>
 
-                        </div>
-                    </div>
-                    
+                        </body>
 
+                    </div>
 
                 </div>
 
